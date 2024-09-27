@@ -54,7 +54,6 @@ export function rendererPath(window: BrowserWindow, fileName: string) {
  }
 }
 function mainUrl(fileName: string) {
-  logger.info(`process.env.ELECTRON_RENDERER_URL: ${process.env.ELECTRON_RENDERER_URL}`)
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
       const mainUrl = `${process.env['ELECTRON_RENDERER_URL']}/${fileName}`;
       return mainUrl;
