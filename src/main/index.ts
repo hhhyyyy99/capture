@@ -1,40 +1,49 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, globalShortcut, ipcMain, shell } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import WindowManager from './windowManger'
 import logger from './utils/logger'
 import { unregisterIPC } from './ipc'
+import icon from '../../resources/icon.png?asset'
+import { join } from 'path'
 
-// function createWindow(): void {
-//   // Create the browser window.
-//   const mainWindow = new BrowserWindow({
-//     width: 900,
-//     height: 670,
-//     show: false,
-//     autoHideMenuBar: true,
-//     ...(process.platform === 'linux' ? { icon } : {}),
-//     webPreferences: {
-//       preload: join(__dirname, '../preload/index.js'),
-//       sandbox: false
-//     }
-//   })
+function createWindow(): BrowserWindow {
+  // Create the browser window.
+  const mainWindow = new BrowserWindow({
+    width: 900,
+    height: 670,
+    show: false,
+    autoHideMenuBar: true,
+    ...(process.platform === 'linux' ? { icon } : {}),
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false
+    }
+  })
 
-//   mainWindow.on('ready-to-show', () => {
-//     mainWindow.show()
-//   })
+  mainWindow.on('ready-to-show', () => {
+    mainWindow.show()
+  })
 
-//   mainWindow.webContents.setWindowOpenHandler((details) => {
-//     shell.openExternal(details.url)
-//     return { action: 'deny' }
-//   })
+  mainWindow.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url)
+    return { action: 'deny' }
+  })
 
-//   // HMR for renderer base on electron-vite cli.
-//   // Load the remote URL for development or the local html file for production.
-//   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-//     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-//   } else {
-//     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
-//   }
-// }
+  // // HMR for renderer base on electron-vite cli.
+  // // Load the remote URL for development or the local html file for production.
+  // if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+  //   mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  // } else {
+  //   mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+  // }
+  globalShortcut.register("CommandOrControl+Shift+A", () => {
+    WindowManager.createWindow()
+  })
+  globalShortcut.register("Esc", () => {
+    WindowManager.closeWindow()
+  })
+  return mainWindow
+}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -43,7 +52,6 @@ app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
   
-  new WindowManager()
  
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
@@ -57,14 +65,13 @@ app.whenReady().then(() => {
     logger.info('main: ping')
   })
 
-  // createWindow()
+  createWindow()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
-      // createWindow()
-      new WindowManager()
+      createWindow()
     }
   })
 })

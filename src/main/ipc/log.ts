@@ -5,7 +5,7 @@ import { Logger } from '@constants/Logger'
 export function registerLogger() {
   ipcMain.on(
     'logger',
-    (event, { type, message, error }: { type: Logger; message: string; error?: Error }) => {
+    (_, { type, message, error }: { type: Logger; message: string; error?: Error }) => {
       switch (type) {
         case Logger.INFO:
           logger.info(message)

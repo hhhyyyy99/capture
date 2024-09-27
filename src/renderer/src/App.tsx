@@ -1,37 +1,63 @@
-import Versions from './components/Versions'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import electronLogo from './assets/electron.svg'
+import { useAsyncRetry } from 'react-use'
 
 function App(): JSX.Element {
-  const ipcHandle = (): void => {
-    window.electron.ipcRenderer.send('ping')
-    window.logger.info('renderder ipc')
-  }
+  // 框选区域的ref
+  const screenshotRef = useRef<HTMLDivElement>(null)
+  const [currentWindow, setCurrentWindow] = useState<Electron.DesktopCapturerSource | null>(null)
+  const [displays, setDisplays] = useState<Electron.Display[]>([])
+
+  const { value: sources } = useAsyncRetry(async () => {
+    return window.api.getDesktopCapturerSource()
+  }, [])
+
+  useEffect(() => {
+    const getDisplays = async () => {
+      const displayInfo = await window.api.getDisplays()
+      setDisplays(displayInfo)
+    }
+    getDisplays()
+  }, [])
+
+  // 当前屏幕的所有窗口
+  sources && console.log(sources)
+  // source 的thumbnail只有这些方法addRepresentation crop getAspectRatio getBitmap getNativeHandle getScaleFactors getSize isEmpty isMacTemplateImage isTemplateImage resize setTemplateImage toBitmap toDataURL toJPEG toPNG
+  const handleMouseMove = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      // 获取鼠标位置
+      const { clientX, clientY } = event
+      
+      // 找到鼠标所在的窗口
+      const currentSource = sources?.find((source) => {
+        const { width, height } = source.thumbnail.getSize()
+        const display = displays.find(d => d.id === parseInt(source.display_id))
+        if (!display) return false
+
+        const x = display.bounds.x
+        const y = display.bounds.y
+
+        return clientX >= x && clientX <= x + width && clientY >= y && clientY <= y + height
+      })
+
+      // 如果找到了新的窗口,更新状态
+      if (currentSource && currentSource.id !== currentWindow?.id) {
+        setCurrentWindow(currentSource)
+        console.log('当前窗口:', currentSource.name)
+      }
+    },
+    [sources, currentWindow, displays]
+  )
 
   return (
-    <>
-      <img alt="logo" className="logo" src={electronLogo} />
-      <div className="creator">Powered by electron-vite</div>
-      <div className="text">
-        Build an Electron app with <span className="react">React</span>
-        &nbsp;and <span className="ts">TypeScript</span>
-      </div>
-      <p className="tip">
-        Please try pressing <code>F12</code> to open the devTool
-      </p>
-      <div className="actions">
-        <div className="action">
-          <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">
-            Documentation
-          </a>
+    <div className="screenshot-container" onMouseMove={handleMouseMove}>
+      <div ref={screenshotRef}></div>
+      {currentWindow && (
+        <div className="current-window-info">
+          当前窗口: {currentWindow.name}
         </div>
-        <div className="action">
-          <a target="_blank" rel="noreferrer" onClick={ipcHandle}>
-            Send IPC
-          </a>
-        </div>
-      </div>
-      <Versions></Versions>
-    </>
+      )}
+    </div>
   )
 }
 

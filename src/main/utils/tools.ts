@@ -1,6 +1,5 @@
-import { webContents, BrowserWindow, Rectangle, screen, app, shell } from 'electron'
+import { webContents, BrowserWindow, Rectangle, screen } from 'electron'
 import { join } from 'path'
-import logger from './utils/logger'
 import { is } from '@electron-toolkit/utils'
 
 // 修复electron18.0.0-beta.5 之后版本的BUG: 无法获取当前程序页面视频流

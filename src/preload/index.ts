@@ -1,9 +1,14 @@
 import { contextBridge } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import { Logger } from '@constants/Logger'
+import { EV_SEND_DESKTOP_CAPTURER_SOURCE } from '@constants/Channel'
 
 // Custom APIs for renderer
 const api = {
+  getDesktopCapturerSource: async () => {
+    return await electronAPI.ipcRenderer.invoke(EV_SEND_DESKTOP_CAPTURER_SOURCE, [])
+  },
+  getDisplays: () => electronAPI.ipcRenderer.invoke('get-displays')
 }
 const logger = {
   info: (message: string) => {
@@ -17,7 +22,7 @@ const logger = {
   },
   debug: (message: string) => {
     electronAPI.ipcRenderer.send('logger', { type: Logger.DEBUG, message: message })
-  },
+  }
 }
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
