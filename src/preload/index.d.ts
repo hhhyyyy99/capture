@@ -1,11 +1,22 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
+import { Rectangle } from 'electron'
+
+export interface Display extends Rectangle {
+  id: number
+  scaleFactor: number,
+  id,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+}
 
 declare global {
   interface Window {
     electron: ElectronAPI
     api: {
       getDesktopCapturerSource: () => Promise<Electron.DesktopCapturerSource[]>
-      getDisplays: () => Promise<Electron.Display[]>
+      getDisplay: () => Promise<Display>
     }
     logger: {
       info: (message: string) => void

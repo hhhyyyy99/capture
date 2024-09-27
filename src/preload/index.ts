@@ -8,7 +8,7 @@ const api = {
   getDesktopCapturerSource: async () => {
     return await electronAPI.ipcRenderer.invoke(EV_SEND_DESKTOP_CAPTURER_SOURCE, [])
   },
-  getDisplays: () => electronAPI.ipcRenderer.invoke('get-displays')
+  getDisplay: () => electronAPI.ipcRenderer.invoke('get-displays')
 }
 const logger = {
   info: (message: string) => {

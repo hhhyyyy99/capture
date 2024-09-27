@@ -2,11 +2,11 @@ import { app, BrowserWindow, globalShortcut, ipcMain, shell } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import WindowManager from './windowManger'
 import logger from './utils/logger'
-import { unregisterIPC } from './ipc'
+import { registerIPC, unregisterIPC } from './ipc'
 import icon from '../../resources/icon.png?asset'
 import { join } from 'path'
 
-function createWindow(): BrowserWindow {
+ function createWindow(): BrowserWindow {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,
@@ -51,8 +51,9 @@ function createWindow(): BrowserWindow {
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
-  
- 
+
+  registerIPC()
+
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
